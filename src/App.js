@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, Fragment} from "react";
 import "./App.css";
 import {nanoid} from 'nanoid';
 /* calls api and getting data back, we are mocking data*/
 import data from "./mock-data.json";
+import ReadOnlyRow from "./components/ReadOnlyRow";
+import EditableRow from "./components/EditableRow";
 /* Arrow function */
 /* */
 const App = () => {
@@ -17,6 +19,22 @@ const App = () => {
     phoneNumber: "",
     email: "",
   });
+
+  /* For the purposes of clarity, we are using two seperate state hooks. */
+  /* Similar to what we did with our add contact form, we wan to update the state
+  when any of the values change. */
+  const [editFormData, setEditFormData] = useState({
+    fullName: "",
+    address: "",
+    phoneNumber: "",
+    email: "", 
+  })
+
+  /* New state hook. */
+  /* When editContactId is null, it means the user isnt editing any row. */
+  /* We want to add a ternanry to render either the editable row, or the read only row
+  depending if we have a editContactId or not. */
+  const [editContactId, setEditContactId] = useState(null); 
 
   /* Function that gets called when a user changes a value in any of the inputs  */
   /* Arrow function that accepts the event  */
@@ -90,6 +108,18 @@ const App = () => {
     
   }
 
+  /* */
+  /* This will be called when the user clicks on the edit button. */
+  /* This accepts contact because we need to know the id of the contact for that row,
+  so we can save it into state. */
+  /* */
+  const handleEditClick = (event, contact) => {
+    event.preventDefault();
+
+    setEditContactId(contact.id);
+  }
+
+
 
   /* className helps position the container */
 
@@ -106,6 +136,7 @@ const App = () => {
             <th>Address</th>
             <th>Phone Number</th>
             <th>Email</th>
+            <th>Actions</th>
           </tr>
         </thead>
         {/* Table body tag */}
@@ -119,13 +150,46 @@ const App = () => {
             we can display the data in our table row */}
           {/* All these properties are coming from the contact object which
               is part of the mock data array */}
+
+          {/* After creating ReadOnlyRow component */}
+          {/* We are rendering our new component in place of our old code.
+          and we are passing in contact as a prop. */}
+          {/* Don't forget to import our component. */}
+
+          {/* After creating EditableRow component */}
+          {/* Cannot have two children components stacked, must use React Fragment. */}
+          {/* Ideally, we want to wrap editable row in a form tag so that we can handle the 
+          form submit and capture the inputs. Unfortunately, we cannot. */}
+          {/* Instead, we will wrap the entire table in the form tags. This is ok as we will
+          only have one set of form inputs displayed being displayed in the DOM at any one time. */}
+          {/* Form inputs will not be duplicated with this approach.  */}
+
+          {/* After creating editContactId state hook */}
+          {/* As the map function flips through the array, 
+          if the id of the current contact object matches the id stored in state 
+          in the editConactId state hook, then it will render the editable row.
+          If not, it will render the read only row. */}
+          {/* We want to add an edit button to each row, which will update our editContactId state hook. */}
+
+          {/* After creating handleEditClick event listener */}
+          {/* We pass this fucntion to our ReadOnlyRow component as a prop
+          as this is where our edit button is going to be. */}
+          {/* The editable row is essentially a form, similar to our addNewContact form. */}
+
+          {/* To create a save and cancel feature, and repopulate the form: */}
+          {/* We will start by creating a new state object to hold the form data 
+          for when we are editing a given row. */}
           {contacts.map((contact) => (
-            <tr>
-              <td>{contact.fullName}</td>
-              <td>{contact.address}</td>
-              <td>{contact.phoneNumber}</td>
-              <td>{contact.email}</td>
-            </tr>
+            <Fragment>
+              
+              {editContactId === contact.id ? (
+              <EditableRow/>
+               ) : (
+               <ReadOnlyRow contact={contact} handleEditClick={handleEditClick}/> 
+               )}
+              
+            </Fragment>
+            
           ))}
         </tbody>
       </table>
