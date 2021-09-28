@@ -5,7 +5,10 @@ import React from 'react';
 /* When we pass things in as props, we can destructure it. */
 /* When we render this component, we will pass in contacts, and our component
 will can render the details based on the contact objects. */
-/*  */
+
+/* After adding edit button */
+/* Whenever the button is clicked, the state changes and sets the editContactId,
+the component re-renders because the state changes and our ternary operator runs.  */
 const ReadOnlyRow = ({contact, handleEditClick}) => {
     return(
         

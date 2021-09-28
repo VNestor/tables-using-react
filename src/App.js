@@ -1,3 +1,5 @@
+/** This was made using the following tutorial: https://www.youtube.com/watch?v=dYjdzpZv5yc&t=2084s */
+
 import React, { useState, Fragment} from "react";
 import "./App.css";
 import {nanoid} from 'nanoid';
@@ -21,14 +23,18 @@ const App = () => {
   });
 
   /* For the purposes of clarity, we are using two seperate state hooks. */
-  /* Similar to what we did with our add contact form, we wan to update the state
+  /* Similar to what we did with our add contact form, we want to update the state
   when any of the values change. */
+  /* Create a function similar to handleAddFormChange - jump to line 84 */
   const [editFormData, setEditFormData] = useState({
     fullName: "",
     address: "",
     phoneNumber: "",
     email: "", 
   })
+
+
+
 
   /* New state hook. */
   /* When editContactId is null, it means the user isnt editing any row. */
@@ -78,6 +84,35 @@ const App = () => {
     setAddFormData(newFormData);
   };
 
+  /* Arrow function that accepts the event */
+  const handleEditFormChange = (event) => {
+    event.preventDefault();
+
+    /* get name */
+    const fieldName = event.target.getAttribute("name");
+    /* get field value */
+    const fieldValue = event.target.value;
+
+    /* Create a new object based on the new values so that we dont mutate the state. */
+    /* Use spread operator to copy data from editFormData */
+    const newFormData = {...editFormData };
+    /* We use square brackets syntax on our object to update the value for a given field. */
+    /* Pass in fieldName, and we set it equal to whatever value the user has typed, in this case, fieldValue */
+    newFormData[fieldName] = fieldValue;
+
+    /* Set to state */
+    setEditFormData(newFormData);
+
+    /* Now we have a way to store the form data. */
+    /* We want to pre populate it with the contact data from that row when the user clicks the edit button. */
+    /* In our handleEditClick function, we already pass in the event and the contact as parameters. */
+    /* All we have to do it take the values from the contact object and save it to our edit form data. */
+    /* Jump to line 155 */
+
+  
+  } 
+
+
   /* */
   /* We will add a function that gets called when the form is submitted */
   /* event.preventDefault prevents the from doing a POST request when its submitted */
@@ -108,6 +143,64 @@ const App = () => {
     
   }
 
+  /**
+   * Similar to the add new contact functionality, we will create a new event handler function. 
+   * 
+   * We create an arrow function that accepts an event.
+   * preventDefault so the page doesnt try to do a POST on form submit.
+   * 
+   * Just like before, we create a new object based on the new data stored in the edit form.
+   * 
+   * We also want to keep the id in place as we need it to determine what row we are editing.
+   * 
+   * We create a newContacts array so we dont mutate the state.
+   * We copy the existing contacts by using the spread operator, "...".
+   * Instead of adding contacts to the end of the array, we want to replace the contact object
+   * in the contacts array with this new object we just created. 
+   * 
+   * First we need to get the index of the row which we are editing:
+   * We use findIndex() and we'll pass in a function.
+   * findIndex() will return an index based on a condition that we pass in.
+   * To find index we pass the contact to our arrow function and then we want to say,
+   * find the index of the contact.id is equal to the editContactId.
+   * The editContactId is the row we are editing, we want to get the index of that row
+   * in the contacts array. 
+   * 
+   * Now that we have the index, we can update the array at the given position.
+   * At the index in our newContacts array, so the contact at this postion in the newContacts array
+   * is going to be equal to our new contact that we created, editedContact.
+   * 
+   * Lastly, we set out new array into state and set our edit contact id to null as we are finished
+   * editing and this will hide the editable row.
+   * 
+   * 
+   */
+
+
+  const handleEditFormSubmit = (event) => {
+    event.preventDefault();
+
+    const editedContact = {
+      id: editContactId,
+      fullname: editFormData.fullName,
+      address: editFormData.address,
+      phoneNumber: editFormData.phoneNumber,
+      email: editFormData.email
+    }
+
+    const newContacts = [...contacts];
+
+    const index = contacts.findIndex((contact)=> contact.id === editContactId);
+
+    newContacts[index] = editedContact;
+
+    setContacts(newContacts);
+    setEditContactId(null);
+
+  }
+
+
+
   /* */
   /* This will be called when the user clicks on the edit button. */
   /* This accepts contact because we need to know the id of the contact for that row,
@@ -117,6 +210,23 @@ const App = () => {
     event.preventDefault();
 
     setEditContactId(contact.id);
+
+    /* Create a new object, formValues, this will have the same properties as our editFormData state object,
+    same as the ones we've been working with so far. */
+    
+    const formValues = {
+      fullName: contact.fullName,
+      address: contact.address,
+      phoneNumber: contact.phoneNumber,
+      email: contact.email
+    }
+
+    /* Set to state. */
+    /** So we have a way to save the values to state and an event handler to update the state */
+    /** We can pass these to our editable row component. */
+    /** Jump to EditableRow component. */
+    setEditFormData(formValues);
+
   }
 
 
@@ -179,11 +289,16 @@ const App = () => {
           {/* To create a save and cancel feature, and repopulate the form: */}
           {/* We will start by creating a new state object to hold the form data 
           for when we are editing a given row. */}
+
+          {/** In the editable row component, we pass our form data, editFormData */}
+          {/** We will pass in our function to update the form values in state when the 
+           * the user types by saying handleEditFormChange
+           */}
           {contacts.map((contact) => (
             <Fragment>
               
               {editContactId === contact.id ? (
-              <EditableRow/>
+              <EditableRow editFormData={editFormData} handleEditFormChange={handleEditFormChange}/>
                ) : (
                <ReadOnlyRow contact={contact} handleEditClick={handleEditClick}/> 
                )}
